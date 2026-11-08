@@ -2,8 +2,8 @@
 
 ## Environment and commands
 
-- Language/runtime: Python **[FILL: output of `python --version`]**.
-- OS / CPU / RAM: **[FILL: e.g. Windows 11, CPU model, N logical cores, N GiB RAM]** (the benchmark script prints this line too).
+- Language/runtime: Python 3.14.5 (CPython).
+- OS / CPU / RAM: macOS arm64 (Apple Silicon, `macOS-27.0.1-arm64-arm-64bit-Mach-O` as reported by Python), 8 logical CPUs, RAM **[FILL: GiB, see Apple menu → About This Mac]**.
 - Build: none (interpreted). Startup check: `python tools/run.py --setup`.
 - Run one request file: `python tools/run.py --input examples/kmp.jsonl` (or `python Python/source/main.py < examples/kmp.jsonl`).
 - Public checks: `python tools/run.py --check` — **[FILL: paste the final result, e.g. all 44 public cases and the repeated batch pass]**.
@@ -111,17 +111,48 @@ Paste the output of `python tests/student/bench_search.py` below (it also saves 
 - Timing scope: only the algorithm call on an already parsed request dictionary (no JSON parsing, no process start, no generation); `time.perf_counter_ns`, milliseconds. Python has no JIT; the warm-up is one untimed call. Compilation is not involved.
 - Commands: `python tests/student/bench_search.py` from the repository root.
 
-**[PASTE the environment line and the Markdown table from the script output here.]**
+Environment: Python 3.14.5 (CPython), macOS-27.0.1-arm64-arm-64bit-Mach-O, arm, logical CPUs 8, RAM GiB **[FILL: your Mac's RAM, e.g. 16]**
+
+|Case|n|m|Seed/generator|Algorithm|Run 1 (ms)|Run 2 (ms)|Run 3 (ms)|Median (ms)|Correct outputs checked|
+|---|---:|---:|---|---|---:|---:|---:|---:|---|
+|random|500|50|seed "2026-random-500-50", random.Random|naive|0.022|0.021|0.021|0.021|yes: naive=kmp=rk=str.find oracle, 1 starts|
+|random|500|50|seed "2026-random-500-50", random.Random|kmp|0.022|0.021|0.021|0.021|yes: naive=kmp=rk=str.find oracle, 1 starts|
+|random|500|50|seed "2026-random-500-50", random.Random|rk|0.054|0.054|0.054|0.054|yes: naive=kmp=rk=str.find oracle, 1 starts|
+|random|1500|150|seed "2026-random-1500-150", random.Random|naive|0.068|0.067|0.067|0.067|yes: naive=kmp=rk=str.find oracle, 1 starts|
+|random|1500|150|seed "2026-random-1500-150", random.Random|kmp|0.064|0.064|0.064|0.064|yes: naive=kmp=rk=str.find oracle, 1 starts|
+|random|1500|150|seed "2026-random-1500-150", random.Random|rk|0.163|0.162|0.162|0.162|yes: naive=kmp=rk=str.find oracle, 1 starts|
+|random|3000|300|seed "2026-random-3000-300", random.Random|naive|0.134|0.135|0.134|0.134|yes: naive=kmp=rk=str.find oracle, 1 starts|
+|random|3000|300|seed "2026-random-3000-300", random.Random|kmp|0.130|0.128|0.128|0.128|yes: naive=kmp=rk=str.find oracle, 1 starts|
+|random|3000|300|seed "2026-random-3000-300", random.Random|rk|0.323|0.313|0.313|0.313|yes: naive=kmp=rk=str.find oracle, 1 starts|
+|repetitive-nomatch|500|50|seed "2026-repetitive-nomatch-500-50", random.Random|naive|0.733|0.728|0.740|0.733|yes: naive=kmp=rk=str.find oracle, 0 starts|
+|repetitive-nomatch|500|50|seed "2026-repetitive-nomatch-500-50", random.Random|kmp|0.048|0.048|0.048|0.048|yes: naive=kmp=rk=str.find oracle, 0 starts|
+|repetitive-nomatch|500|50|seed "2026-repetitive-nomatch-500-50", random.Random|rk|0.046|0.046|0.046|0.046|yes: naive=kmp=rk=str.find oracle, 0 starts|
+|repetitive-nomatch|1500|150|seed "2026-repetitive-nomatch-1500-150", random.Random|naive|5.995|5.851|5.679|5.851|yes: naive=kmp=rk=str.find oracle, 0 starts|
+|repetitive-nomatch|1500|150|seed "2026-repetitive-nomatch-1500-150", random.Random|kmp|0.121|0.122|0.122|0.122|yes: naive=kmp=rk=str.find oracle, 0 starts|
+|repetitive-nomatch|1500|150|seed "2026-repetitive-nomatch-1500-150", random.Random|rk|0.121|0.120|0.121|0.121|yes: naive=kmp=rk=str.find oracle, 0 starts|
+|repetitive-nomatch|3000|300|seed "2026-repetitive-nomatch-3000-300", random.Random|naive|23.279|22.620|22.843|22.843|yes: naive=kmp=rk=str.find oracle, 0 starts|
+|repetitive-nomatch|3000|300|seed "2026-repetitive-nomatch-3000-300", random.Random|kmp|0.274|0.265|0.263|0.265|yes: naive=kmp=rk=str.find oracle, 0 starts|
+|repetitive-nomatch|3000|300|seed "2026-repetitive-nomatch-3000-300", random.Random|rk|0.241|0.245|0.242|0.242|yes: naive=kmp=rk=str.find oracle, 0 starts|
+|repetitive-allmatch|500|50|seed "2026-repetitive-allmatch-500-50", random.Random|naive|0.636|0.627|0.626|0.627|yes: naive=kmp=rk=str.find oracle, 451 starts|
+|repetitive-allmatch|500|50|seed "2026-repetitive-allmatch-500-50", random.Random|kmp|0.041|0.040|0.040|0.040|yes: naive=kmp=rk=str.find oracle, 451 starts|
+|repetitive-allmatch|500|50|seed "2026-repetitive-allmatch-500-50", random.Random|rk|0.671|0.653|0.653|0.653|yes: naive=kmp=rk=str.find oracle, 451 starts|
+|repetitive-allmatch|1500|150|seed "2026-repetitive-allmatch-1500-150", random.Random|naive|5.689|5.684|5.663|5.684|yes: naive=kmp=rk=str.find oracle, 1351 starts|
+|repetitive-allmatch|1500|150|seed "2026-repetitive-allmatch-1500-150", random.Random|kmp|0.130|0.129|0.129|0.129|yes: naive=kmp=rk=str.find oracle, 1351 starts|
+|repetitive-allmatch|1500|150|seed "2026-repetitive-allmatch-1500-150", random.Random|rk|5.815|5.804|5.853|5.815|yes: naive=kmp=rk=str.find oracle, 1351 starts|
+|repetitive-allmatch|3000|300|seed "2026-repetitive-allmatch-3000-300", random.Random|naive|22.708|22.680|22.807|22.708|yes: naive=kmp=rk=str.find oracle, 2701 starts|
+|repetitive-allmatch|3000|300|seed "2026-repetitive-allmatch-3000-300", random.Random|kmp|0.285|0.284|0.284|0.284|yes: naive=kmp=rk=str.find oracle, 2701 starts|
+|repetitive-allmatch|3000|300|seed "2026-repetitive-allmatch-3000-300", random.Random|rk|23.109|23.161|23.107|23.109|yes: naive=kmp=rk=str.find oracle, 2701 starts|
+
 
 ### Observations
 
-**[CHECK against your own table and edit the wording to match what you measured.]**
+Times below are medians from the table (ms; sizes (n, m) = (500, 50), (1500, 150), (3000, 300)).
 
-- On `random` text naive is not slower than KMP, because mismatches are usually found at the first character of a window, so it does only about n comparisons. RK pays for computing a hash for every window, so its constant is higher in Python.
-- On `repetitive-nomatch` naive grows roughly with n·m (compare your 500/1500/3000 rows: n and m grow together, so the time grows much faster than linearly), while KMP and RK stay close to linear in n.
-- On `repetitive-allmatch` RK is as slow as naive: every window is an equal-hash candidate and is verified in O(m). This shows the c·m term in O(n + m + c·m); KMP stays linear plus output.
-- Wall-clock times on one machine do not prove an asymptotic bound; they are consistent with, but do not establish, the stated complexities. Times of a few tenths of a millisecond are close to timer and interpreter noise, so use the medians and the larger sizes for comparison.
-- Modulus 101 effect: with only 101 possible hash values, unequal windows collide with probability about 1/101 for random-like data, so verification runs on a noticeable fraction of windows, and in the worst case on all windows. This conclusion is about this assignment's deliberately small modulus, not about production hash implementations with a large modulus or randomized base. The known collision `ab`/`dj` (both 75) is kept as a correctness test (`test_search.py` and the public case `rk-collision`).
+- **Random text.** Naive and KMP are practically equal (0.021 / 0.064 / 0.134 vs 0.021 / 0.064 / 0.128). On random text most windows mismatch at the first character, so naive makes only about n comparisons and KMP's fallback machinery gives no advantage. RK is about 2.4 times slower (0.054 / 0.162 / 0.313) because it updates a hash for every window, and in Python each update costs more than a first-character comparison. All three grow roughly in proportion to n.
+- **Repetitive, no match** (`a`ⁿ against `a`^(m−1)`b`). Naive takes 0.733 / 5.851 / 22.843, a growth of about 8× and then 3.9×, while (n−m+1)·m grows 9× and then 4×; this is consistent with the O(n·m) bound. KMP (0.048 / 0.122 / 0.265) and RK (0.046 / 0.121 / 0.242) stay close to linear in n; at the largest size naive is about 86 times slower than KMP. RK is fast here because the window hashes of `a…a` differ from the pattern's hash, so there are almost no candidates to verify.
+- **Repetitive, all match** (`a`ⁿ against `a`^m). RK now behaves like naive (0.653 / 5.815 / 23.109 vs 0.627 / 5.684 / 22.708): every window has an equal hash and each candidate is verified in O(m), which is the c·m term of O(n + m + c·m). KMP stays near-linear (0.040 / 0.129 / 0.284) even though it outputs up to 2701 starts, because after each full match it falls back through `pi` instead of restarting.
+- These are single-machine wall-clock times of a Python implementation, so they are consistent with the stated bounds but do not prove asymptotic complexity. Values of a few hundredths of a millisecond are close to timer resolution and interpreter overhead, so the larger sizes and medians are the meaningful comparison. The three runs of each cell agree closely here, so no outlier was dropped.
+- **Effect of modulus 101.** With only 101 hash values, two different windows collide with probability about 1/101 on random-like data, so some windows need character verification even when they do not match, and in the worst case (the all-match case above, or a text where many windows share the pattern's hash) every window is verified. This conclusion is about this assignment's deliberately small modulus, not about production hash implementations with a large modulus or a randomized base. The known collision `ab`/`dj` (both hash to 75) is kept as a correctness test (`test_search.py` and the public case `rk-collision`).
 
 ## Sources and AI assistance
 
