@@ -102,21 +102,76 @@ def tree(request):
     return {'weight': max(take[0], skip[0]), 'selected': selected}
 
 def naive(request):
-    """Establish a simple exact-search baseline against which the other two searches can be checked. Implement naive according to docs/guide/CONTRACTS.md."""
-    raise NotImplementedError("TODO naive")
-
+    """Try every start 0..n-m and compare characters one by one."""
+    text, pattern = request['text'], request['pattern']
+    n, m = len(text), len(pattern)
+    if m == 0:
+        return {'positions': list(range(n + 1))}
+    positions = []
+    for i in range(n - m + 1):
+        j = 0
+        while j < m and text[i + j] == pattern[j]:
+            j += 1
+        if j == m:
+            positions.append(i)
+    return {'positions': positions}
+ 
 def kmp(request):
-    """Reuse information about matched prefixes to avoid restarting the search after every mismatch. Implement kmp according to docs/guide/CONTRACTS.md."""
-    raise NotImplementedError("TODO kmp")
-
+    """pi[i] = length of the longest proper prefix of pattern[:i+1] that is also its suffix."""
+    text, pattern = request['text'], request['pattern']
+    n, m = len(text), len(pattern)
+    if m == 0:
+        return {'positions': list(range(n + 1))}
+    pi = [0] * m
+    k = 0
+    for i in range(1, m):
+        while k > 0 and pattern[i] != pattern[k]:
+            k = pi[k - 1]
+        if pattern[i] == pattern[k]:
+            k += 1
+        pi[i] = k
+    positions = []
+    k = 0
+    for i in range(n):
+        while k > 0 and (k == m or text[i] != pattern[k]):
+            k = pi[k - 1]
+        if text[i] == pattern[k]:
+            k += 1
+        if k == m:
+            positions.append(i - m + 1)
+    return {'positions': positions}
+ 
 def rk(request):
-    """Reject windows with unequal fingerprints and verify every equal-hash candidate. Implement rk according to docs/guide/CONTRACTS.md."""
-    raise NotImplementedError("TODO rk")
-
+    """Rolling hash (base 31, mod 101); every equal-hash window is verified."""
+    text, pattern = request['text'], request['pattern']
+    n, m = len(text), len(pattern)
+    if m == 0:
+        return {'positions': list(range(n + 1))}
+    if m > n:
+        return {'positions': []}
+    base, mod = 31, 101
+    high = pow(base, m - 1, mod)
+    hp = hw = 0
+    for i in range(m):
+        hp = (hp * base + ord(pattern[i])) % mod
+        hw = (hw * base + ord(text[i])) % mod
+    positions = []
+    for i in range(n - m + 1):
+        if hp == hw:
+            j = 0
+            while j < m and text[i + j] == pattern[j]:
+                j += 1
+            if j == m:
+                positions.append(i)
+        if i + m < n:
+            hw = ((hw - ord(text[i]) * high) * base + ord(text[i + m])) % mod
+    return {'positions': positions}
+ 
 def suffix(request):
     """Order the text suffixes and use adjacent common prefixes to find repeated substrings. Implement suffix according to docs/guide/CONTRACTS.md."""
     raise NotImplementedError("TODO suffix")
-
+ 
 def aho(request):
     """Build one dictionary automaton and count its patterns in several independent texts. Implement aho according to docs/guide/CONTRACTS.md."""
     raise NotImplementedError("TODO aho")
+ 
