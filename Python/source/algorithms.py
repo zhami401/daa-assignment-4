@@ -168,10 +168,92 @@ def rk(request):
     return {'positions': positions}
  
 def suffix(request):
-    """Order the text suffixes and use adjacent common prefixes to find repeated substrings. Implement suffix according to docs/guide/CONTRACTS.md."""
-    raise NotImplementedError("TODO suffix")
+    """Suffix array by prefix doubling (comparison sort of rank pairs) + Kasai LCP."""
+    text = request['text']
+    n = len(text)
+    if n == 0:
+        return {'sa': [], 'lcp': [], 'repeated': ''}
+    rank = [ord(c) for c in text]
+    sa = list(range(n))
+    k = 1
+    while True:
+        big = max(rank) + 2
+        key = [rank[i] * big + (rank[i + k] + 1 if i + k < n else 0) for i in range(n)]
+        sa.sort(key=key.__getitem__)
+        new_rank = [0] * n
+        r = 0
+        for idx in range(1, n):
+            if key[sa[idx]] != key[sa[idx - 1]]:
+                r += 1
+            new_rank[sa[idx]] = r
+        rank = new_rank
+        if r == n - 1 or k >= n:
+            break
+        k *= 2
+    lcp = [0] * n
+    h = 0
+    for i in range(n):
+        if rank[i] > 0:
+            j = sa[rank[i] - 1]
+            while i + h < n and j + h < n and text[i + h] == text[j + h]:
+                h += 1
+            lcp[rank[i]] = h
+            if h > 0:
+                h -= 1
+        else:
+            h = 0
+    best = max(lcp)
+    repeated = ''
+    if best > 0:
+        pos = lcp.index(best)
+        repeated = text[sa[pos]:sa[pos] + best]
+    return {'sa': sa, 'lcp': lcp, 'repeated': repeated}
  
 def aho(request):
-    """Build one dictionary automaton and count its patterns in several independent texts. Implement aho according to docs/guide/CONTRACTS.md."""
-    raise NotImplementedError("TODO aho")
+    """One Aho-Corasick automaton per request; per text, count visits per state and
+    push the counts down the failure links in reverse BFS order."""
+    patterns, texts = request['patterns'], request['texts']
+    p = len(patterns)
+    children = [{}]
+    term = [0] * p
+    for idx, pat in enumerate(patterns):
+        v = 0
+        for ch in pat:
+            nxt = children[v].get(ch)
+            if nxt is None:
+                nxt = len(children)
+                children[v][ch] = nxt
+                children.append({})
+            v = nxt
+        term[idx] = v
+    s = len(children)
+    fail = [0] * s
+    order = []
+    queue = list(children[0].values())
+    head = 0
+    while head < len(queue):
+        u = queue[head]
+        head += 1
+        order.append(u)
+        for ch, v in children[u].items():
+            f = fail[u]
+            while f and ch not in children[f]:
+                f = fail[f]
+            fail[v] = children[f].get(ch, 0)
+            queue.append(v)
+    counts = []
+    for text in texts:
+        visits = [0] * s
+        state = 0
+        for ch in text:
+            while state and ch not in children[state]:
+                state = fail[state]
+            state = children[state].get(ch, 0)
+            visits[state] += 1
+        for v in reversed(order):
+            c = visits[v]
+            if c:
+                visits[fail[v]] += c
+        counts.append([visits[t] for t in term])
+    return {'counts': counts}
  
